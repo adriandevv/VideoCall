@@ -1,0 +1,60 @@
+import { Model, DataTypes, Sequelize, InferAttributes, InferCreationAttributes, CreationOptional } from "sequelize";
+
+const USERS_TABLE = "users";
+
+const UsersSchema = {
+    id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+    },
+    username: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    avatar: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
+    created_at: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+    },
+};
+
+class Users extends Model<InferAttributes<Users>, InferCreationAttributes<Users>> {
+    declare id: CreationOptional<number>;
+    declare username: string;
+    declare password: string;
+    declare avatar: string | null;
+    declare created_at: CreationOptional<Date>;
+
+    static associate(models: any) {
+        this.hasMany(models.CallParticipants, {
+            foreignKey: "user_id",
+            as: "participations",
+        });
+        this.hasMany(models.Messages, {
+            foreignKey: "sender_id",
+            as: "messages",
+        });
+    }
+
+    static config(sequelize: Sequelize) {
+        return {
+            sequelize,
+            tableName: USERS_TABLE,
+            modelName: "Users",
+            timestamps: false,
+        };
+    }
+}
+
+export { USERS_TABLE, UsersSchema, Users };

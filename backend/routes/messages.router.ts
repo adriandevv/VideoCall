@@ -1,0 +1,61 @@
+import express, { Request, Response } from 'express';
+import MessagesService from '../services/messages.service.js';
+import validatorHandler from '../middlewares/validator.handler.js';
+import {
+    createMessageSchema,
+    getMessageSchema,
+    getCallMessagesSchema
+} from '../schema/messages.schema.js';
+
+const router = express.Router();
+const service = new MessagesService();
+
+router.get('/', async (req: Request, res: Response) => {
+    try {
+        const messages = await service.find();
+        res.json(messages);
+    } catch (error: any) {
+        res.status(500).json({ message: 'Error retrieving messages', error: error.message });
+    }
+});
+
+router.get('/call/:callId',
+    validatorHandler(getCallMessagesSchema, 'params'),
+    async (req: Request, res: Response) => {
+        try {
+            const { callId } = req.params;
+            const messages = await service.findByCall(callId as string);
+            res.json(messages);
+        } catch (error: any) {
+            res.status(500).json({ message: 'Error retrieving messages for call', error: error.message });
+        }
+    }
+);
+
+router.post('/',
+    validatorHandler(createMessageSchema, 'body'),
+    async (req: Request, res: Response) => {
+        try {
+            const body = req.body;
+            const newMessage = await service.create(body);
+            res.status(201).json(newMessage);
+        } catch (error: any) {
+            res.status(500).json({ message: 'Error creating message', error: error.message });
+        }
+    }
+);
+
+router.delete('/:id',
+    validatorHandler(getMessageSchema, 'params'),
+    async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            const result = await service.delete(parseInt(id as string));
+            res.json(result);
+        } catch (error: any) {
+            res.status(500).json({ message: 'Error deleting message', error: error.message });
+        }
+    }
+);
+
+export default router;
