@@ -2,9 +2,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Avatar } from "../ui/Avatar";
 import { Icon } from "../ui/Icon";
 import { cn } from "../../lib/utils";
+import { useAuthStore } from "../../store/authStore";
 
 export function Sidebar() {
     const location = useLocation();
+    const { user } = useAuthStore();
 
     const navItems = [
         { icon: "grid_view", label: "Dashboard", path: "/" },
@@ -32,13 +34,19 @@ export function Sidebar() {
 
                 {/* Profile */}
                 <div className="flex items-center gap-3 p-3 rounded-2xl bg-slate-100 dark:bg-[#1c1a2e] mb-6">
-                    <Avatar
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJTdvYWjt2iYMiA29gO77m9W4-CHnmz2hIA0cV7hyssS9kfEjACiodjL3v3k3ic_vWUGKSfc2DDGv4QnjocHrjluxe-6ZyE__x3_zR6ZD4MVSxh6lQni56tJvLzWTVj7o56G3_sHW5W8IcLLGBwwTK9EK6Mbg6cGCxSQEDslt2CmdwbVabEVr2vcJxrluZlGJDE8N2xBEBl-CsWerUN3i6Mab_VDf6A2EDmI9PvhTkVVyR1dZFAxi-n389EWbmQRbfzwWSm3APrko"
-                        status="online"
-                        className="border-2 border-primary rounded-full p-0.5"
-                    />
+                    {user?.avatar ? (
+                        <img
+                            src={user.avatar}
+                            alt={user.username}
+                            className="w-10 h-10 border-2 border-primary rounded-full object-cover p-0.5"
+                        />
+                    ) : (
+                        <div className="w-10 h-10 border-2 border-primary rounded-full p-0.5 flex items-center justify-center bg-slate-200 dark:bg-[#2b2839]">
+                            <span className="text-sm font-bold">{user?.username?.[0]?.toUpperCase() || '?'}</span>
+                        </div>
+                    )}
                     <div className="flex flex-col">
-                        <h1 className="text-sm font-bold">Alex Johnson</h1>
+                        <h1 className="text-sm font-bold">{user?.username}</h1>
                         <p className="text-slate-500 dark:text-[#a19db9] text-xs">Available</p>
                     </div>
                 </div>
