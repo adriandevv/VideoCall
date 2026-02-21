@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import UsersService from '../services/users.service.js';
 import validatorHandler from '../middlewares/validator.handler.js';
 import { createUserSchema, updateUserSchema, getUserSchema } from '../schema/users.schema.js';
+import { verifyToken } from '../middlewares/auth.middleware.js';
 
 const router = express.Router();
 const service = new UsersService();
@@ -65,6 +66,45 @@ router.delete('/:id',
             res.json(result);
         } catch (error: any) {
             res.status(500).json({ message: 'Error deleting user', error: error.message });
+        }
+    }
+);
+
+router.put('/me',
+    verifyToken,
+    validatorHandler(updateUserSchema, 'body'),
+    async (req: Request, res: Response) => {
+        try {
+            const userId = (req as any).user.sub;
+            const body = req.body;
+
+            // Do not allow users to change passwords from this general endpoint for safety
+            delete body.password;
+
+            const result = await service.update(userId, body);
+            res.json(result);
+        } catch (error: any) {
+            res.status(500).json({ message: 'Error updating profile', error: error.message });
+        }
+    }
+);
+
+router.post('/me/avatar',
+    verifyToken,
+    // Add specific schema/limitations if required, or handled directly 
+    async (req: Request, res: Response) => {
+        try {
+            const userId = (req as any).user.sub;
+            const { avatar } = req.body; // Expects a base64 string
+
+            if (!avatar) {
+                return res.status(400).json({ message: 'Avatar data is required' });
+            }
+
+            const result = await service.update(userId, { avatar });
+            res.json(result);
+        } catch (error: any) {
+            res.status(500).json({ message: 'Error uploading avatar', error: error.message });
         }
     }
 );

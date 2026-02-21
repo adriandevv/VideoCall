@@ -14,12 +14,21 @@ const UsersSchema = {
         allowNull: false,
         unique: true,
     },
+    email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+    },
     password: {
         type: DataTypes.STRING,
         allowNull: false,
     },
     avatar: {
-        type: DataTypes.STRING,
+        type: DataTypes.TEXT('long'),
+        allowNull: true,
+    },
+    refresh_token: {
+        type: DataTypes.TEXT,
         allowNull: true,
     },
     created_at: {
@@ -32,8 +41,10 @@ const UsersSchema = {
 class Users extends Model<InferAttributes<Users>, InferCreationAttributes<Users>> {
     declare id: CreationOptional<number>;
     declare username: string;
+    declare email: string;
     declare password: string;
     declare avatar: string | null;
+    declare refresh_token: string | null;
     declare created_at: CreationOptional<Date>;
 
     static associate(models: any) {
